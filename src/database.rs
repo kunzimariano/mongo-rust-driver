@@ -126,7 +126,7 @@ impl<'a> Database<'a> {
 
         // mongoc_collection_command_simple expects an *uninitialized* stack allocated bson_t.
         // If we pass an initialized value, it will leak.
-        let mut reply: bindings::bson_t = unsafe { MaybeUninit::zeroed().assume_init() };
+        let mut reply: MaybeUninit<bindings::bson_t> = MaybeUninit::zeroed();
         // Empty error that might be filled
         let mut error = BsoncError::empty();
 
@@ -138,12 +138,13 @@ impl<'a> Database<'a> {
                     Some(ref prefs) => prefs.inner(),
                     None => ptr::null(),
                 },
-                &mut reply,
+                reply.as_mut_ptr(),
                 error.mut_inner(),
             )
         };
 
         if success == 1 {
+            let mut reply = unsafe { reply.assume_init() };
             let result = Bsonc::from_ptr(&reply).as_document();
 
             unsafe {
