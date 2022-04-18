@@ -83,6 +83,7 @@ fn main() {
 
     // Output to Cargo
     println!("cargo:rustc-link-search=native={}/usr/local/lib", &out_dir.to_string_lossy());
+    println!("cargo:rustc-link-search=native={}/usr/local/lib/x86_64-linux-gnu", &out_dir.to_string_lossy());
     println!("cargo:rustc-link-lib=static=bson-static-1.0");
     println!("cargo:rustc-link-lib=static=mongoc-static-1.0");
     println!("cargo:rustc-link-lib=resolv");
