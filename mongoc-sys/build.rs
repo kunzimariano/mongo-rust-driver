@@ -12,10 +12,11 @@ fn main() {
 
     let pkg = pkg_config::Config::new();
     pkg.probe("zlib").expect("Cannot find zlib");
-    #[cfg(target_os = "linux")] pkg.probe("icu-i18n").expect("Cannot find icu");
+    #[cfg(target_os = "linux")]
+    pkg.probe("icu-i18n").expect("Cannot find icu");
     match pkg.probe("snappy") {
         Ok(_) => (),
-        Err(e) => println!("Snappy not found: {}", e)
+        Err(e) => println!("Snappy not found: {}", e),
     }
 
     let out_dir_var = env::var("OUT_DIR").expect("No out dir");
@@ -30,26 +31,23 @@ fn main() {
             mongoc_version,
             mongoc_version
         );
-        assert!(
-            Command::new("curl").arg("-O") // Save to disk
-                .current_dir(out_dir)
-                .arg("-L") // Follow redirects
-                .arg(url)
-                .status()
-                .expect("Could not run curl")
-                .success()
-        );
+        assert!(Command::new("curl")
+            .arg("-O") // Save to disk
+            .current_dir(out_dir)
+            .arg("-L") // Follow redirects
+            .arg(url)
+            .status()
+            .expect("Could not run curl")
+            .success());
 
         let archive_name = format!("mongo-c-driver-{}.tar.gz", mongoc_version);
-        assert!(
-            Command::new("tar")
-                .current_dir(out_dir)
-                .arg("xzf")
-                .arg(&archive_name)
-                .status()
-                .expect("Could not run tar")
-                .success()
-        );
+        assert!(Command::new("tar")
+            .current_dir(out_dir)
+            .arg("xzf")
+            .arg(&archive_name)
+            .status()
+            .expect("Could not run tar")
+            .success());
 
         // Set up cmake command
         let mut cmake = Command::new("cmake");
@@ -82,8 +80,17 @@ fn main() {
     }
 
     // Output to Cargo
-    println!("cargo:rustc-link-search=native={}/usr/local/lib", &out_dir.to_string_lossy());
-    println!("cargo:rustc-link-search=native={}/usr/local/lib/x86_64-linux-gnu", &out_dir.to_string_lossy());
+    println!(
+        "cargo:rustc-link-search=native={}/usr/local/lib",
+        &out_dir.to_string_lossy()
+    );
+    // println!("cargo:rustc-link-search=native={}/usr/local/lib/x86_64-linux-gnu", &out_dir.to_string_lossy());
+    // stable-aarch64-apple-darwin
+    // aarch64-apple-darwin
+    println!(
+        "cargo:rustc-link-search=native={}/opt/homebrew/Cellar",
+        &out_dir.to_string_lossy()
+    );
     println!("cargo:rustc-link-lib=static=bson-static-1.0");
     println!("cargo:rustc-link-lib=static=mongoc-static-1.0");
     println!("cargo:rustc-link-lib=resolv");
